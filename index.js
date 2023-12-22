@@ -1,42 +1,58 @@
 const cardWraps = document.querySelectorAll(".card_wrap");
 const cards = document.querySelectorAll(".card");
 
+
 let hasFlippedCard = false;
 let lockBoard = false;
 let firstCard, secondCard;
 
+
+
+
+// Function to flip a card
 function flipCard() {
-  if (lockBoard) return;
-  if (this === firstCard) return;
+    if (lockBoard || this === firstCard) return;
+  
+    this.classList.add("open");
+  
+    if (!hasFlippedCard) {
+      hasFlippedCard = true;
+      firstCard = this;
+    } else {
+      secondCard = this;
+      checkForMatch();
+    }
+}
+  
 
-  this.classList.add("open");
 
-  if (!hasFlippedCard) {
-    hasFlippedCard = true;
-    firstCard = this;
-    return;
-  }
 
-  secondCard = this;
-  checkForMatch();
+// Function to check if cards match
+ function checkForMatch() {
+    let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+    isMatch ? disableCards() : unflipCards();
 }
 
-function checkForMatch() {
-  let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
 
-  isMatch ? disableCards() : unflipCards();
-}
 
+
+
+// Function to disable matched cards
 function disableCards() {
-  firstCard.removeEventListener("click", flipCard);
-  secondCard.removeEventListener("click", flipCard);
-
-  firstCard.classList.add("matched");
-  secondCard.classList.add("matched");
-
-  resetBoard();
+    firstCard.removeEventListener("click", flipCard);
+    secondCard.removeEventListener("click", flipCard);
+  
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+  
+    resetBoard();
 }
 
+
+
+
+
+// Function to unflip unmatched cards
 function unflipCards() {
   lockBoard = true;
   firstCard.classList.add("unmatched");
@@ -51,34 +67,55 @@ function unflipCards() {
   }, 1000);
 }
 
+
+
+
+// Function to reset the board after checking for matches
 function resetBoard() {
   [hasFlippedCard, lockBoard] = [false, false];
   [firstCard, secondCard] = [null, null];
 }
 
-(function shuffle() {
-  cardWraps.forEach((cardWrap) => {
-    let randomPos = Math.floor(Math.random() * 12);
-    cardWrap.style.order = randomPos;
-  });
-})();
 
+
+
+
+// Function to shuffle an array using Fisher-Yates algorithm
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+  
+  const cardWrapArray = Array.from(cardWraps);
+  shuffle(cardWrapArray);
+  
+  cardWrapArray.forEach((cardWrap, index) => {
+    cardWrap.style.order = index;
+});
+  
 
 
 
 cards.forEach((card) => card.addEventListener("click", flipCard));
 
+
+// Reveal cards at the beginning
 setTimeout(() => {
   cards.forEach((card) => {
     card.classList.add("open");
   });
-}, 1000);
+}, 100);
 
+
+// Close cards at the beginning
 setTimeout(() => {
   cards.forEach((card) => {
     card.classList.remove("open");
   });
-}, 1000);
+}, 2000);
 
 
 
+  
